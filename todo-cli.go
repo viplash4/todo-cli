@@ -29,6 +29,20 @@ func loadTasks() []Task {
 	return tasks
 		
 } 
+
+func saveTasks(tasks []Task) {
+	data, err := json.MarshalIndent(tasks, "", " ")
+	if err != nil {
+		fmt.Println("saveTasks Error: ", err)
+		return
+	}
+	err = os.WriteFile("tasks.json", data, 0644)
+	if err != nil {
+		fmt.Println("saveTasks Error: ", err)
+		return
+	}
+
+}
 func main() {
 	fmt.Println("Debug: ", os.Args)
 	switch {
@@ -37,11 +51,37 @@ func main() {
 		return
 	case os.Args[1] == "add":
 		fmt.Println("Add")
-		tasks := loadTasks()
-		fmt.Println("debug tasks: ", tasks)
+		if len(os.Args) >= 3 {
+			tasks := loadTasks()
+			maxID := 0
+			for _, t := range tasks {
+    			if t.Id > maxID {
+       				 maxID = t.Id
+				}
+			}
+			now := time.Now()
+			newTask := Task {
+				Id: maxID + 1,
+				Description: os.Args[2],
+				Status: "todo",
+				CreatedAt: now,
+				UpdatedAt: now,
+			}
+			tasks = append(tasks, newTask)
+			saveTasks(tasks)
+		}
+		
 	case os.Args[1] == "update":
 		fmt.Println("Update")
 	case os.Args[1] == "delete":
 		fmt.Println("delete")
-	}
+    }
+	
+		
 }
+
+
+		
+		
+	
+
