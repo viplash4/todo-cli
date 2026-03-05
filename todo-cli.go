@@ -15,6 +15,13 @@ type Task struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+const (
+	StatusToDo = "todo"
+	StatusInProgress = "in-progress"
+	StatusDone = "done"
+)
+
 func loadTasks() []Task {
 	var tasks []Task
 	data, err := os.ReadFile("tasks.json")
@@ -44,14 +51,39 @@ func saveTasks(tasks []Task) {
 	}
 
 }
+
+func findTaskIndex (tasks []Task, id int) int {
+	for i,t := range tasks {
+		if t.Id == id {
+			return i
+		}
+	}
+	return -1
+}
+
+func changeStatus (idString string, status string) {
+	tasks := loadTasks()
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		idx := findTaskIndex(tasks, id)
+		if idx >= 0 {
+			tasks[idx].Status = status
+			tasks[idx].UpdatedAt = time.Now()
+			saveTasks(tasks)
+			fmt.Printf("Task #%s was successfully updated!\n", os.Args[2])
+			} else {
+				fmt.Println("Task not found")
+			}
+		}
+}
 func main() {
-	fmt.Println("Debug: ", os.Args)
 	switch {
 	case len(os.Args) < 2:
-		fmt.Println("usage")
+		fmt.Println("Wrong arguments, read README.md to use it correctly")
 		return
 	case os.Args[1] == "add":
-		fmt.Println("Add")
 		if len(os.Args) >= 3 {
 			tasks := loadTasks()
 			maxID := 0
@@ -71,46 +103,40 @@ func main() {
 			tasks = append(tasks, newTask)
 			saveTasks(tasks)
 		}
-		
 	case os.Args[1] == "update":
-		fmt.Println("Update")
-		if (len(os.Args) > 3){
+		if  len(os.Args) > 3 {
 			tasks := loadTasks()
 			id, err := strconv.Atoi(os.Args[2])
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				
-				for i, t := range tasks {
-					if t.Id == id {
-						tasks[i].Description = os.Args[3]
-						tasks[i].UpdatedAt = time.Now()
-						saveTasks(tasks)
-						fmt.Printf("Task #%s was successfully updated!\n", os.Args[2])
-						break
-					}
+				idx := findTaskIndex(tasks, id)
+				if idx >= 0 {
+					tasks[idx].Description = os.Args[3]
+					tasks[idx].UpdatedAt = time.Now()
+					saveTasks(tasks)
+					fmt.Printf("Task #%s was successfully updated!\n", os.Args[2])
+				} else {
+					fmt.Println("Task not found")
 				}
 			}
-			
 		}
 	case os.Args[1] == "delete":
-		if (len(os.Args) > 2){
+		if  len(os.Args) > 2 {
 			tasks := loadTasks()
 			id, err := strconv.Atoi(os.Args[2])
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				
-				for i, t := range tasks {
-					if t.Id == id {
-						tasks = append(tasks[:i], tasks[i+1:]...)
-						saveTasks(tasks)
-						fmt.Printf("Task #%s was deleted successfully \n", os.Args[2])
-						break
-					}
+				idx := findTaskIndex(tasks, id) 
+				if idx >= 0 {
+					tasks = append(tasks[:idx], tasks[idx+1:]...)
+					saveTasks(tasks)
+					fmt.Printf("Task #%s was deleted successfully \n", os.Args[2])
+				} else {
+					fmt.Println("Task not found")
 				}
 			}
-			
 		}
 	case os.Args[1] == "list":
 		tasks := loadTasks()
@@ -132,53 +158,12 @@ func main() {
 			}
 		}
 	case os.Args[1] == "mark-in-progress":
-		if (len(os.Args) > 2){
-			tasks := loadTasks()
-			id, err := strconv.Atoi(os.Args[2])
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				
-				for i, t := range tasks {
-					if t.Id == id {
-						tasks[i].Status = "in progress"
-						tasks[i].UpdatedAt = time.Now()
-						saveTasks(tasks)
-						fmt.Printf("Task #%s was successfully updated!\n", os.Args[2])
-						break
-					}
-				}
-			}
-			
+		if len(os.Args) > 2 {
+			changeStatus(os.Args[2], StatusInProgress)
 		}
 	case os.Args[1] == "mark-done":
-		if (len(os.Args) > 2){
-			tasks := loadTasks()
-			id, err := strconv.Atoi(os.Args[2])
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				
-				for i, t := range tasks {
-					if t.Id == id {
-						tasks[i].Status = "done"
-						tasks[i].UpdatedAt = time.Now()
-						saveTasks(tasks)
-						fmt.Printf("Task #%s was successfully updated!\n", os.Args[2])
-						break
-					}
-				}
-			}
-			
+		if len(os.Args) > 2 {
+			changeStatus(os.Args[2], StatusDone)
 		}
     }
-	
-	
-		
 }
-
-
-		
-		
-	
-
