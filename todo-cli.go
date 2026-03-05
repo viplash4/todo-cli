@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 	"encoding/json"
+	"strconv"
 )
 
 type Task struct {
@@ -74,7 +75,24 @@ func main() {
 	case os.Args[1] == "update":
 		fmt.Println("Update")
 	case os.Args[1] == "delete":
-		fmt.Println("delete")
+		if (len(os.Args) > 2){
+			tasks := loadTasks()
+			id, err := strconv.Atoi(os.Args[2])
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				
+				for i, t := range tasks {
+					if t.Id == id {
+						tasks = append(tasks[:i], tasks[i+1:]...)
+						saveTasks(tasks)
+						fmt.Printf("Task #%s was deleted successfully \n", os.Args[2])
+						break
+					}
+				}
+			}
+			
+		}
 	case os.Args[1] == "list":
 		tasks := loadTasks()
 		var result []Task
