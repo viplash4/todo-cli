@@ -75,6 +75,26 @@ func main() {
 		fmt.Println("Update")
 	case os.Args[1] == "delete":
 		fmt.Println("delete")
+	case os.Args[1] == "list":
+		tasks := loadTasks()
+		var result []Task
+		if (len(os.Args) > 2){
+			for _, t := range tasks {
+				if t.Status == os.Args[2] {
+					result = append(result, t)
+				}
+			}
+		} else {
+			result = tasks
+		}
+		if len(result) == 0 {
+			fmt.Println("No tasks")
+		} else {
+			for _, t := range result {
+				fmt.Printf("[#%d] [%s] %s \n", t.Id, t.Status, t.Description)
+			}
+		}
+
     }
 	
 		
