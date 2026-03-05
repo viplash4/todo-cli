@@ -74,6 +74,25 @@ func main() {
 		
 	case os.Args[1] == "update":
 		fmt.Println("Update")
+		if (len(os.Args) > 3){
+			tasks := loadTasks()
+			id, err := strconv.Atoi(os.Args[2])
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				
+				for i, t := range tasks {
+					if t.Id == id {
+						tasks[i].Description = os.Args[3]
+						tasks[i].UpdatedAt = time.Now()
+						saveTasks(tasks)
+						fmt.Printf("Task #%s was successfully updated!\n", os.Args[2])
+						break
+					}
+				}
+			}
+			
+		}
 	case os.Args[1] == "delete":
 		if (len(os.Args) > 2){
 			tasks := loadTasks()
